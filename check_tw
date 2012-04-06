@@ -9,6 +9,10 @@ use Getopt::Long;
 
 our $VERSION = '0.4';
 
+my $SUDO;
+$SUDO = `which sudo`;
+chomp $SUDO;
+
 my $CLI;
 BEGIN {
     $CLI = $FindBin::Bin . '/tw_cli';
@@ -32,13 +36,6 @@ our $critical = 0;
 
 
 #---------------------------------------------------------------------
-# Main
-# GET Controllers
-$< == 0 or do {
-    warn "Only root can run this program.\n";
-    exit UNKNOWN;
-};
-
 GetOptions("skip-check-bbu", \my $skip_check_bbu);
 
 
@@ -140,7 +137,7 @@ sub cmd_execute {
         my $tw_cli_file = $ENV{DEBUG_TW_CLI_DATA}.'_'.$show_arg;
         open $fh, '<', $tw_cli_file;
     } else {
-        open $fh, '-|', $CLI, @_;
+        open $fh, '-| ', $SUDO, $CLI, @_;
     }
     chomp(my $d = <$fh>); # dummy
     $d eq '' or die $d;
